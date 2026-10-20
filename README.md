@@ -1,5 +1,7 @@
 # Mercado Libre Price Tracker – Official Store Monitor
 
+[![CI](https://github.com/ENER90/mercadolibre-price-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/ENER90/mercadolibre-price-tracker/actions/workflows/ci.yml)
+
 [![Apify Store](https://img.shields.io/badge/Apify%20Store-live-0F62FE?logo=apify&logoColor=white)](https://apify.com/ener90/mercadolibre-seller-price-monitor)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
 ![Crawlee](https://img.shields.io/badge/Crawlee-3-FF4785)
