@@ -1,0 +1,16 @@
+{
+  "actorSpecification": 1,
+  "name": "mercadolibre-seller-price-monitor",
+  "title": "Mercado Libre Price Tracker \u2013 Official Store Monitor",
+  "description": "Monitor Mercado Libre official stores (featured products) and get only what changed: price drops/increases, previous price, discount, new and removed products. Chile, Argentina, M\u00e9xico, Brasil, Colombia and more. No login needed.",
+  "version": "0.1",
+  "buildTag": "latest",
+  "input": "./input_schema.json",
+  "storages": {
+    "dataset": "./dataset_schema.json"
+  },
+  "output": "./output_schema.json",
+  "dockerfile": "./Dockerfile",
+  "readme": "./STORE_README.md",
+  "changelog": "../CHANGELOG.md"
+}

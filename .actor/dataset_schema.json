@@ -1,0 +1,106 @@
+{
+  "actorSpecification": 1,
+  "fields": {},
+  "views": {
+    "changes": {
+      "title": "Changes",
+      "transformation": {
+        "fields": [
+          "detectedAt",
+          "changeType",
+          "itemId",
+          "title",
+          "field",
+          "oldValue",
+          "newValue",
+          "changePercent",
+          "currency",
+          "source",
+          "url"
+        ]
+      },
+      "display": {
+        "component": "table",
+        "properties": {
+          "detectedAt": {
+            "label": "Detected",
+            "format": "date"
+          },
+          "changeType": {
+            "label": "Change"
+          },
+          "itemId": {
+            "label": "Listing"
+          },
+          "title": {
+            "label": "Title"
+          },
+          "field": {
+            "label": "Field"
+          },
+          "oldValue": {
+            "label": "Old"
+          },
+          "newValue": {
+            "label": "New"
+          },
+          "changePercent": {
+            "label": "% change",
+            "format": "number"
+          },
+          "currency": {
+            "label": "Currency"
+          },
+          "source": {
+            "label": "Source"
+          },
+          "url": {
+            "label": "URL",
+            "format": "link"
+          }
+        }
+      }
+    },
+    "priceHistory": {
+      "title": "Price history",
+      "transformation": {
+        "fields": [
+          "detectedAt",
+          "itemId",
+          "title",
+          "oldValue",
+          "newValue",
+          "changePercent",
+          "currency",
+          "source",
+          "url"
+        ]
+      },
+      "display": {
+        "component": "table",
+        "properties": {
+          "detectedAt": {
+            "label": "Detected",
+            "format": "date"
+          },
+          "oldValue": {
+            "label": "Old price",
+            "format": "number"
+          },
+          "newValue": {
+            "label": "New price",
+            "format": "number"
+          },
+          "changePercent": {
+            "label": "% change",
+            "format": "number"
+          },
+          "url": {
+            "label": "URL",
+            "format": "link"
+          }
+        }
+      }
+    }
+  }
+}

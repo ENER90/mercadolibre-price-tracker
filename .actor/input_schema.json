@@ -1,0 +1,148 @@
+{
+  "title": "Mercado Libre Seller & Price Monitor",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "officialStores": {
+      "title": "Official stores",
+      "type": "array",
+      "editor": "stringList",
+      "description": "Official store slugs or URLs, e.g. samsung or https://www.mercadolibre.cl/tienda/samsung. Tracks the products shown on the store's storefront. No credentials needed.",
+      "prefill": [
+        "samsung"
+      ]
+    },
+    "items": {
+      "title": "Listings (URLs or IDs)",
+      "type": "array",
+      "editor": "stringList",
+      "description": "Listing URLs or IDs like MLC1234567890. Requires Mercado Libre API credentials (below). Advanced: needs your own Mercado Libre OAuth access; may be blocked (HTTP 403)."
+    },
+    "sellers": {
+      "title": "Sellers (ID or nickname)",
+      "type": "array",
+      "editor": "stringList",
+      "description": "Seller IDs or nicknames, tracked through the official search API. Mercado Libre restricted this endpoint in 2025, so it works only with an API token that still has access. Advanced: needs your own Mercado Libre OAuth access; may be blocked (HTTP 403)."
+    },
+    "site": {
+      "title": "Site / country",
+      "type": "string",
+      "editor": "select",
+      "default": "MLC",
+      "description": "Default site for slugs and bare IDs. Store URLs override it.",
+      "enum": [
+        "MLC",
+        "MLA",
+        "MLM",
+        "MLB",
+        "MCO",
+        "MLU",
+        "MPE",
+        "MEC"
+      ],
+      "enumTitles": [
+        "Chile",
+        "Argentina",
+        "México",
+        "Brasil",
+        "Colombia",
+        "Uruguay",
+        "Perú",
+        "Ecuador"
+      ]
+    },
+    "trackPrice": {
+      "title": "Track price",
+      "type": "boolean",
+      "default": true,
+      "description": "Report price changes."
+    },
+    "trackDiscount": {
+      "title": "Track discount label",
+      "type": "boolean",
+      "default": false,
+      "description": "Report changes of the discount badge (e.g. 30% OFF)."
+    },
+    "trackStock": {
+      "title": "Track stock",
+      "type": "boolean",
+      "default": true,
+      "description": "Report available quantity changes (API sources only; storefront pages don't show stock)."
+    },
+    "trackListings": {
+      "title": "Track new / removed listings",
+      "type": "boolean",
+      "default": true,
+      "description": "Report listings that appear or disappear."
+    },
+    "trackStatus": {
+      "title": "Track status",
+      "type": "boolean",
+      "default": true,
+      "description": "Report status changes (active, paused, closed, not_found)."
+    },
+    "minChangePercent": {
+      "title": "Min price change %",
+      "type": "integer",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Ignore price changes smaller than this percentage (e.g. 5 = only changes of 5% or more). Ignored changes are not charged."
+    },
+    "onlyPriceDrops": {
+      "title": "Only price drops",
+      "type": "boolean",
+      "default": false,
+      "description": "Report price decreases only (increases are ignored and not charged)."
+    },
+    "outputBaseline": {
+      "title": "Output baseline on first run",
+      "type": "boolean",
+      "default": false,
+      "description": "On the first run (no previous snapshot) also write every listing as a BASELINE row."
+    },
+    "monitorName": {
+      "title": "Monitor name",
+      "type": "string",
+      "editor": "textfield",
+      "default": "default",
+      "description": "Snapshots are kept in a named key-value store per monitor name. Use different names for different watch lists."
+    },
+    "resetBaseline": {
+      "title": "Reset baseline",
+      "type": "boolean",
+      "default": false,
+      "description": "Ignore the saved snapshot and start over."
+    },
+    "mlClientId": {
+      "title": "Mercado Libre app ID (optional)",
+      "type": "string",
+      "editor": "textfield",
+      "sectionCaption": "Mercado Libre API (optional)",
+      "description": "From developers.mercadolibre.com. Needed for listings and sellers."
+    },
+    "mlClientSecret": {
+      "title": "Mercado Libre app secret",
+      "type": "string",
+      "editor": "textfield",
+      "isSecret": true,
+      "description": "Used only to get a token; never logged or stored."
+    },
+    "mlAccessToken": {
+      "title": "Mercado Libre access token",
+      "type": "string",
+      "editor": "textfield",
+      "isSecret": true,
+      "description": "Alternative to app ID + secret."
+    },
+    "proxyConfiguration": {
+      "title": "Proxy",
+      "type": "object",
+      "editor": "proxy",
+      "default": {
+        "useApifyProxy": false
+      },
+      "description": "Use Apify Proxy (e.g. RESIDENTIAL) if store pages get blocked."
+    }
+  }
+}

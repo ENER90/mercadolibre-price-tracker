@@ -1,0 +1,25 @@
+{
+  "actorOutputSchemaVersion": 1,
+  "title": "Mercado Libre monitor output",
+  "description": "Only changes since the previous run go to the default dataset. A run summary is saved as OUTPUT.",
+  "properties": {
+    "changes": {
+      "type": "string",
+      "title": "Changes",
+      "description": "Detected changes (default dataset).",
+      "template": "{{links.apiDefaultDatasetUrl}}/items?view=changes"
+    },
+    "summary": {
+      "type": "string",
+      "title": "Run summary",
+      "description": "Listings tracked and changes per source.",
+      "template": "{{links.apiDefaultKeyValueStoreUrl}}/records/OUTPUT"
+    },
+    "priceHistory": {
+      "type": "string",
+      "title": "Price history",
+      "description": "Changes table focused on prices.",
+      "template": "{{links.apiDefaultDatasetUrl}}/items?view=priceHistory"
+    }
+  }
+}
