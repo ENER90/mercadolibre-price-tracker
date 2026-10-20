@@ -90,6 +90,17 @@ Monitors Mercado Libre **official stores** (storefront featured products: price,
 
 **Limitations:** storefront pages expose the featured products only (typically 20 to 60) and no stock. Listing pages and search pages are behind a login wall, so single listings rely on the official API.
 
+## 🔗 More scrapers by ener90 / Más scrapers de ener90
+
+- [Mercado Libre Reviews & Questions Scraper](https://apify.com/ener90/mercadolibre-reviews-questions) – opiniones y preguntas de Mercado Libre
+- [TrustRadius Reviews Scraper](https://apify.com/ener90/software-reviews-scraper) – reseñas de software B2B de TrustRadius
+- [Walmart Reviews Scraper](https://apify.com/ener90/walmart-products-reviews) – reseñas y productos de Walmart
+- [Product Hunt Scraper](https://apify.com/ener90/product-hunt-launches) – lanzamientos diarios de Product Hunt
+- Chile Real Estate Scraper (Portal Inmobiliario + TocToc) (`ener90/chile-real-estate-scraper`, coming soon / próximamente) – propiedades en venta y arriendo en Chile
+- AI Review Insights (`ener90/ai-review-insights`, coming soon / próximamente) – análisis de reseñas con IA
+
+Need a custom scraper or a different site? Open an issue in the **Issues** tab. / ¿Necesitas un scraper a medida? Escríbeme en la pestaña **Issues** (soporte en español).
+
 ## 🧩 API & integrations quick start
 
 **cURL (sync, returns items)**

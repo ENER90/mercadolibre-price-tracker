@@ -1,8 +1,8 @@
 {
   "actorSpecification": 1,
   "name": "mercadolibre-seller-price-monitor",
-  "title": "Mercado Libre Price Tracker \u2013 Official Store Monitor",
-  "description": "Monitor Mercado Libre official stores (featured products) and get only what changed: price drops/increases, previous price, discount, new and removed products. Chile, Argentina, M\u00e9xico, Brasil, Colombia and more. No login needed.",
+  "title": "Mercado Libre Price Tracker – Official Store Monitor",
+  "description": "Tracks Mercado Libre official store prices and returns only what changed: price drops and increases, previous price, discount, new and removed products. Seguimiento de precios de la competencia en Chile, Argentina, México, Colombia, Perú and Uruguay. Schedule it for daily alerts.",
   "version": "0.1",
   "buildTag": "latest",
   "input": "./input_schema.json",
