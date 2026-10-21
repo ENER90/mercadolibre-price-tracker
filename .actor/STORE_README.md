@@ -2,6 +2,10 @@
 
 Lo armé para dejar de revisar a mano las tiendas oficiales de Mercado Libre. Cada vez que corre compara con la vez anterior y te entrega solo lo que cambió: precios que subieron o bajaron, descuentos nuevos, y productos que aparecieron o se fueron. Lo programas una vez, diario o cada hora, y te avisa por email, Slack o webhook. No necesita login.
 
+Si prefieres verlo funcionando antes de probarlo, grabé un tutorial corto en video:
+
+https://www.youtube.com/watch?v=E2gTsONNYYw
+
 Funciona en Chile, Argentina, México, Brasil, Colombia, Uruguay, Perú y Ecuador.
 
 ![Formulario con la tienda oficial de Samsung](https://raw.githubusercontent.com/ENER90/mercadolibre-price-tracker/main/docs/screenshots/01-input.png)
