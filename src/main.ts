@@ -11,17 +11,22 @@ interface Input {
 
 await Actor.init();
 const input = (await Actor.getInput<Input>()) ?? {};
-const site = (input.site ?? 'MLC').toUpperCase();
-if (!SITES[site]) throw new Error(`Unsupported site "${site}". Supported: ${Object.keys(SITES).join(', ')}`);
+let site = String(input.site || 'MLC').trim().toUpperCase();
+if (!SITES[site]) { log.warning(`Unsupported site "${site}" (supported: ${Object.keys(SITES).join(', ')}). Using MLC (Chile).`); site = 'MLC'; }
+const inputErrors: { type: 'error'; input: string; error: string }[] = [];
 const track: Track = { price: input.trackPrice ?? true, discount: input.trackDiscount ?? false, stock: input.trackStock ?? true, listings: input.trackListings ?? true, status: input.trackStatus ?? true };
 const monitor = kvKey(input.monitorName?.trim() || 'default');
 const now = new Date().toISOString();
 const store = await Actor.openKeyValueStore(`ml-monitor-${monitor}`.toLowerCase().replace(/[^a-z0-9-]/g, '-').slice(0, 63));
 
-const stores = [], itemIds: string[] = [], sellers = (input.sellers ?? []).map((s) => s.trim()).filter(Boolean);
-for (const s of input.officialStores ?? []) { try { stores.push(parseStore(s, site)); } catch (e) { log.error((e as Error).message); } }
-for (const s of input.items ?? []) { try { itemIds.push(parseItemId(s, site)); } catch (e) { log.error((e as Error).message); } }
-if (!stores.length && !itemIds.length && !sellers.length) throw new Error('Input error: add at least one official store, seller or item.');
+const arr = (v: any): string[] => (Array.isArray(v) ? v : []).map((x: any) => String(typeof x === 'object' && x ? x.url ?? '' : x ?? '').trim()).filter(Boolean);
+const stores = [], itemIds: string[] = [], sellers = arr(input.sellers);
+let demo = false;
+if (!arr(input.officialStores).length && !arr(input.items).length && !sellers.length) { log.warning('No officialStores, sellers or items given. Running a short demo with the example official store "samsung". Add your own to monitor them.'); input.officialStores = ['samsung']; demo = true; }
+for (const s of arr(input.officialStores)) { try { stores.push(parseStore(s, site)); } catch (e) { log.error((e as Error).message); inputErrors.push({ type: 'error', input: s, error: (e as Error).message }); } }
+for (const s of arr(input.items)) { try { itemIds.push(parseItemId(s, site)); } catch (e) { log.error((e as Error).message); inputErrors.push({ type: 'error', input: s, error: (e as Error).message }); } }
+if (inputErrors.length) await Actor.pushData(inputErrors);
+if (!stores.length && !itemIds.length && !sellers.length) { const m = 'None of the given stores/sellers/items could be recognised. Use an official store slug (e.g. "samsung"), a seller nickname/id, or an item URL/id like MLC123456789.'; log.error(m); await Actor.exit({ statusMessage: m }); }
 
 // ---- optional official API token (never logged) ----
 let token = input.mlAccessToken?.trim() || undefined;
@@ -107,5 +112,5 @@ for (const src of sources) {
   } catch (e) { failed++; summary.push({ source: src.label, error: (e as Error).message }); log.error(`${src.label}: ${(e as Error).message}`); }
 }
 await Actor.setValue('OUTPUT', { checkedAt: now, monitorName: monitor, trackedListings: tracked, changesDetected: changes, sources: summary });
-if (failed === sources.length) await Actor.fail('All sources failed. See log.');
-else await Actor.exit(`Tracked ${tracked} listings, ${changes} changes.`);
+if (failed === sources.length) await Actor.exit({ statusMessage: 'No source could be fetched (blocked, not found or layout change). See the log and the error rows; try again later or with a RESIDENTIAL proxy.' });
+else await Actor.exit(`${demo ? 'Demo: ' : ''}Tracked ${tracked} listings, ${changes} changes.`);
