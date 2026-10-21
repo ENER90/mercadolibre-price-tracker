@@ -16,13 +16,19 @@
       "title": "Listings (URLs or IDs)",
       "type": "array",
       "editor": "stringList",
-      "description": "Listing URLs or IDs like MLC1234567890. Requires Mercado Libre API credentials (below). Advanced: needs your own Mercado Libre OAuth access; may be blocked (HTTP 403)."
+      "description": "Listing URLs or IDs like MLC1234567890. Requires Mercado Libre API credentials (below). Advanced: needs your own Mercado Libre OAuth access; may be blocked (HTTP 403).",
+      "example": [
+        "MLC1234567890"
+      ]
     },
     "sellers": {
       "title": "Sellers (ID or nickname)",
       "type": "array",
       "editor": "stringList",
-      "description": "Seller IDs or nicknames, tracked through the official search API. Mercado Libre restricted this endpoint in 2025, so it works only with an API token that still has access. Advanced: needs your own Mercado Libre OAuth access; may be blocked (HTTP 403)."
+      "description": "Seller IDs or nicknames, tracked through the official search API. Mercado Libre restricted this endpoint in 2025, so it works only with an API token that still has access. Advanced: needs your own Mercado Libre OAuth access; may be blocked (HTTP 403).",
+      "example": [
+        "123456789"
+      ]
     },
     "site": {
       "title": "Site / country",
@@ -49,37 +55,43 @@
         "Uruguay",
         "Perú",
         "Ecuador"
-      ]
+      ],
+      "prefill": "MLC"
     },
     "trackPrice": {
       "title": "Track price",
       "type": "boolean",
       "default": true,
-      "description": "Report price changes."
+      "description": "Report price changes.",
+      "prefill": true
     },
     "trackDiscount": {
       "title": "Track discount label",
       "type": "boolean",
       "default": false,
-      "description": "Report changes of the discount badge (e.g. 30% OFF)."
+      "description": "Report changes of the discount badge (e.g. 30% OFF).",
+      "prefill": false
     },
     "trackStock": {
       "title": "Track stock",
       "type": "boolean",
       "default": true,
-      "description": "Report available quantity changes (API sources only; storefront pages don't show stock)."
+      "description": "Report available quantity changes (API sources only; storefront pages don't show stock).",
+      "prefill": true
     },
     "trackListings": {
       "title": "Track new / removed listings",
       "type": "boolean",
       "default": true,
-      "description": "Report listings that appear or disappear."
+      "description": "Report listings that appear or disappear.",
+      "prefill": true
     },
     "trackStatus": {
       "title": "Track status",
       "type": "boolean",
       "default": true,
-      "description": "Report status changes (active, paused, closed, not_found)."
+      "description": "Report status changes (active, paused, closed, not_found).",
+      "prefill": true
     },
     "minChangePercent": {
       "title": "Min price change %",
@@ -87,39 +99,45 @@
       "default": 0,
       "minimum": 0,
       "maximum": 100,
-      "description": "Ignore price changes smaller than this percentage (e.g. 5 = only changes of 5% or more). Ignored changes are not charged."
+      "description": "Ignore price changes smaller than this percentage (e.g. 5 = only changes of 5% or more). Ignored changes are not charged.",
+      "prefill": 0
     },
     "onlyPriceDrops": {
       "title": "Only price drops",
       "type": "boolean",
       "default": false,
-      "description": "Report price decreases only (increases are ignored and not charged)."
+      "description": "Report price decreases only (increases are ignored and not charged).",
+      "prefill": false
     },
     "outputBaseline": {
       "title": "Output baseline on first run",
       "type": "boolean",
       "default": false,
-      "description": "On the first run (no previous snapshot) also write every listing as a BASELINE row."
+      "description": "On the first run (no previous snapshot) also write every listing as a BASELINE row.",
+      "prefill": false
     },
     "monitorName": {
       "title": "Monitor name",
       "type": "string",
       "editor": "textfield",
       "default": "default",
-      "description": "Snapshots are kept in a named key-value store per monitor name. Use different names for different watch lists."
+      "description": "Snapshots are kept in a named key-value store per monitor name. Use different names for different watch lists.",
+      "prefill": "default"
     },
     "resetBaseline": {
       "title": "Reset baseline",
       "type": "boolean",
       "default": false,
-      "description": "Ignore the saved snapshot and start over."
+      "description": "Ignore the saved snapshot and start over.",
+      "prefill": false
     },
     "mlClientId": {
       "title": "Mercado Libre app ID (optional)",
       "type": "string",
       "editor": "textfield",
       "sectionCaption": "Mercado Libre API (optional)",
-      "description": "From developers.mercadolibre.com. Needed for listings and sellers."
+      "description": "From developers.mercadolibre.com. Needed for listings and sellers.",
+      "example": "1234567890123456"
     },
     "mlClientSecret": {
       "title": "Mercado Libre app secret",
@@ -142,7 +160,11 @@
       "default": {
         "useApifyProxy": false
       },
-      "description": "Use Apify Proxy (e.g. RESIDENTIAL) if store pages get blocked."
+      "description": "Use Apify Proxy (e.g. RESIDENTIAL) if store pages get blocked.",
+      "prefill": {
+        "useApifyProxy": false
+      }
     }
-  }
+  },
+  "description": "Escribe el slug de una tienda oficial (por ejemplo samsung), elige el país y prográmalo. Cada ejecución entrega solo lo que cambió desde la anterior."
 }
