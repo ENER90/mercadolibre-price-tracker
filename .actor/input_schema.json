@@ -114,7 +114,7 @@
       "type": "boolean",
       "default": false,
       "description": "On the first run (no previous snapshot) also write every listing as a BASELINE row.",
-      "prefill": false
+      "prefill": true
     },
     "monitorName": {
       "title": "Monitor name",

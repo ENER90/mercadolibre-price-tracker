@@ -1,3 +1,5 @@
+import * as cheerio from 'cheerio';
+
 export const SITES: Record<string, { domain: string; storePath: string; country: string }> = {
   MLC: { domain: 'www.mercadolibre.cl', storePath: 'tienda', country: 'Chile' },
   MLA: { domain: 'www.mercadolibre.com.ar', storePath: 'tienda', country: 'Argentina' },
@@ -13,6 +15,8 @@ export const SITES: Record<string, { domain: string; storePath: string; country:
 export interface ItemState {
   itemId: string; title: string | null; price: number | null; previousPrice: number | null; currency: string | null;
   discount: string | null; availableQuantity: number | null; status: string | null; url: string | null;
+  /** Store / seller name when known (storefront pages). */
+  seller?: string | null;
 }
 export type Snapshot = Record<string, ItemState>;
 export interface Track { price: boolean; stock: boolean; listings: boolean; status: boolean; discount: boolean }
@@ -21,7 +25,7 @@ export type ChangeType = 'BASELINE' | 'NEW_LISTING' | 'REMOVED_LISTING' | 'PRICE
 export interface Change {
   changeType: ChangeType; itemId: string; title: string | null; field: string | null;
   oldValue: string | number | null; newValue: string | number | null; changePercent: number | null; currency: string | null;
-  source: string; siteId: string; url: string | null; detectedAt: string; previousCheckAt: string | null;
+  source: string; siteId: string; url: string | null; seller?: string | null; detectedAt: string; previousCheckAt: string | null;
 }
 
 export interface StoreRef { siteId: string; slug: string; url: string }
@@ -64,8 +68,59 @@ function balanced(text: string, start: number): string | null {
   return null;
 }
 
-/** Extract every "polycard" (product card) from an official-store storefront HTML page. */
+/** Extract every product card from an official-store storefront HTML page (current HTML layout, old embedded-JSON layout as fallback). */
 export function parseStorefront(html: string, store: StoreRef): ItemState[] {
+  const out = new Map<string, ItemState>();
+  for (const it of [...parseStorefrontHtml(html, store), ...parseStorefrontJson(html, store)]) if (!out.has(it.itemId)) out.set(it.itemId, it);
+  return [...out.values()];
+}
+
+const CURRENCIES: Record<string, string> = { MLC: 'CLP', MLA: 'ARS', MLM: 'MXN', MLB: 'BRL', MCO: 'COP', MLU: 'UYU', MPE: 'PEN', MEC: 'USD' };
+/** "1.299.991" / "1.299,50" / "1299991" -> number. Returns null when it is not a number. */
+function money(txt: string | undefined | null): number | null {
+  if (!txt) return null;
+  const t = txt.replace(/[^\d.,]/g, '');
+  if (!t) return null;
+  const lastComma = t.lastIndexOf(','), lastDot = t.lastIndexOf('.');
+  let n: string;
+  if (lastComma > lastDot) n = t.replace(/\./g, '').replace(',', '.'); // 1.299,50
+  else if (lastDot !== -1 && t.length - lastDot - 1 === 3) n = t.replace(/\./g, ''); // 1.299.991 (thousands)
+  else n = t.replace(/,/g, '');
+  const v = Number(n);
+  return Number.isFinite(v) ? v : null;
+}
+const ariaAmount = (label: string | undefined) => { const m = label?.match(/(\d[\d.,]*)/); return m ? money(m[1]) : null; };
+
+/** Current layout: <a class="poly-component__title" href="...wid=MLC123..."> inside .poly-card__content. */
+function parseStorefrontHtml(html: string, store: StoreRef): ItemState[] {
+  if (!html.includes('poly-card__content')) return [];
+  const $ = cheerio.load(html);
+  const seller = ($('title').first().text().split('|')[0] ?? '').trim() || store.slug;
+  const currency = CURRENCIES[store.siteId] ?? null;
+  const items: ItemState[] = [];
+  $('.poly-card__content').each((_, el) => {
+    const c = $(el);
+    const a = c.find('a.poly-component__title').first();
+    const href = (a.attr('href') ?? '').trim();
+    const idm = href.match(/[?&#]wid=([A-Z]{3}\d{6,})/i) ?? href.match(/item_id(?:%3A|:|=)([A-Z]{3}\d{6,})/i) ?? href.match(/\b([A-Z]{3})-?(\d{8,})\b/);
+    if (!idm) return;
+    const itemId = (idm.length === 3 && !/\d{6,}/.test(idm[1]) ? idm[1] + idm[2] : idm[1]).toUpperCase();
+    const title = (a.text() || a.attr('title') || '').replace(/\s+/g, ' ').trim() || null;
+    const cur = c.find('.poly-price__current .andes-money-amount').first();
+    const prev = c.find('.poly-price__previous').first();
+    const price = money(cur.find('.andes-money-amount__fraction').first().text()) ?? ariaAmount(cur.attr('aria-label'));
+    const prevPrice = prev.length ? money(prev.find('.andes-money-amount__fraction').first().text()) ?? ariaAmount(prev.attr('aria-label')) : null;
+    const disc = c.find('.poly-price__disc-label').first().text().replace(/\s+/g, ' ').trim() || null;
+    const sym = cur.find('.andes-money-amount__currency-symbol').first().text().trim();
+    items.push({
+      itemId, title, price, previousPrice: prevPrice, currency: currency ?? (sym === 'US$' ? 'USD' : null), discount: disc,
+      availableQuantity: null, status: 'active', url: href ? href.replace(/#.*$/, '').replace(/^http:/, 'https:') : null, seller,
+    });
+  });
+  return items;
+}
+
+function parseStorefrontJson(html: string, store: StoreRef): ItemState[] {
   const out = new Map<string, ItemState>();
   const scripts = [...html.matchAll(/_n\.ctx\.s\.q\(("(?:[^"\\]|\\.)*")\)/g)].map((m) => { try { return JSON.parse(m[1]) as string; } catch { return ''; } });
   if (!scripts.length && html.includes('"polycards"')) scripts.push(html);
@@ -86,7 +141,7 @@ export function parseStorefront(html: string, store: StoreRef): ItemState[] {
           itemId: id, title: comp('title')?.text ?? null,
           price: num(price?.current_price?.value), previousPrice: num(price?.previous_price?.value),
           currency: price?.current_price?.currency ?? null, discount: price?.discount_label?.text ?? null,
-          availableQuantity: null, status: 'active', url: u,
+          availableQuantity: null, status: 'active', url: u, seller: store.slug,
         });
       }
     }
@@ -108,7 +163,7 @@ export function parseItemsApi(json: any): ItemState[] {
 export function diff(prev: Snapshot | null, curr: ItemState[], track: Track, ctx: { source: string; siteId: string; now: string; prevAt: string | null; complete: boolean }): Change[] {
   const base = (s: ItemState, t: ChangeType, field: string | null, o: any, n: any, pct: number | null = null): Change => ({
     changeType: t, itemId: s.itemId, title: s.title, field, oldValue: o ?? null, newValue: n ?? null, changePercent: pct, currency: s.currency,
-    source: ctx.source, siteId: ctx.siteId, url: s.url, detectedAt: ctx.now, previousCheckAt: ctx.prevAt,
+    source: ctx.source, siteId: ctx.siteId, url: s.url, ...(s.seller ? { seller: s.seller } : {}), detectedAt: ctx.now, previousCheckAt: ctx.prevAt,
   });
   if (!prev) return curr.map((s) => base(s, 'BASELINE', null, null, s.price));
   const out: Change[] = [];

@@ -22,7 +22,7 @@ const store = await Actor.openKeyValueStore(`ml-monitor-${monitor}`.toLowerCase(
 const arr = (v: any): string[] => (Array.isArray(v) ? v : []).map((x: any) => String(typeof x === 'object' && x ? x.url ?? '' : x ?? '').trim()).filter(Boolean);
 const stores = [], itemIds: string[] = [], sellers = arr(input.sellers);
 let demo = false;
-if (!arr(input.officialStores).length && !arr(input.items).length && !sellers.length) { log.warning('No officialStores, sellers or items given. Running a short demo with the example official store "samsung". Add your own to monitor them.'); input.officialStores = ['samsung']; demo = true; }
+if (!arr(input.officialStores).length && !arr(input.items).length && !sellers.length) { log.warning('No officialStores, sellers or items given. Running a short demo with the example official store "samsung". Add your own to monitor them.'); input.officialStores = ['samsung']; input.outputBaseline = true; demo = true; }
 for (const s of arr(input.officialStores)) { try { stores.push(parseStore(s, site)); } catch (e) { log.error((e as Error).message); inputErrors.push({ type: 'error', input: s, error: (e as Error).message }); } }
 for (const s of arr(input.items)) { try { itemIds.push(parseItemId(s, site)); } catch (e) { log.error((e as Error).message); inputErrors.push({ type: 'error', input: s, error: (e as Error).message }); } }
 if (inputErrors.length) await Actor.pushData(inputErrors);
@@ -109,8 +109,11 @@ for (const src of sources) {
     tracked += items.length;
     summary.push({ source: src.label, tracked: items.length, baseline: isBaseline, changes: isBaseline ? 0 : ch.length });
     log.info(`${src.label}: ${items.length} listings, ${isBaseline ? 'baseline saved' : `${ch.length} changes`}.`);
-  } catch (e) { failed++; summary.push({ source: src.label, error: (e as Error).message }); log.error(`${src.label}: ${(e as Error).message}`); }
+  } catch (e) { failed++; summary.push({ source: src.label, error: (e as Error).message }); log.error(`${src.label}: ${(e as Error).message}`); await Actor.pushData({ type: 'error', input: src.label, error: (e as Error).message }); }
 }
 await Actor.setValue('OUTPUT', { checkedAt: now, monitorName: monitor, trackedListings: tracked, changesDetected: changes, sources: summary });
-if (failed === sources.length) await Actor.exit({ statusMessage: 'No source could be fetched (blocked, not found or layout change). See the log and the error rows; try again later or with a RESIDENTIAL proxy.' });
-else await Actor.exit(`${demo ? 'Demo: ' : ''}Tracked ${tracked} listings, ${changes} changes.`);
+if (failed === sources.length) {
+  // Nothing could be read: fail loudly with the real reason instead of ending "OK" with an empty dataset.
+  const reasons = [...new Set(summary.filter((x) => x.error).map((x) => String(x.error)))].join(' | ').slice(0, 400);
+  await Actor.fail(`No source could be read: ${reasons}`);
+} else await Actor.exit(`${demo ? 'Demo: ' : ''}Tracked ${tracked} listings, ${changes} changes${failed ? `; ${failed} of ${sources.length} sources failed (see the log)` : ''}.`);
